@@ -1,3 +1,4 @@
+/*
 package com.gmail.vladbaransky.service.impl;
 
 import com.gmail.vladbaransky.service.SearchDataService;
@@ -96,4 +97,4 @@ class SearchDataServiceImplTest {
         assertThat(returnedSearchData.getUrlList()).isEqualTo(expectedSearchData.getUrlList());
         assertThat(returnedSearchData.getTermAndNumberOfRepetitions()).isEqualTo(expectedSearchData.getTermAndNumberOfRepetitions());
     }
-}
+}*/

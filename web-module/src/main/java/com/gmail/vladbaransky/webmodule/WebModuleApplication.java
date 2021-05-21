@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {
+        "com.gmail.vladbaransky.repositorymodule",
         "com.gmail.vladbaransky.webmodule",
         "com.gmail.vladbaransky.service"})
 public class WebModuleApplication {

@@ -16,11 +16,13 @@
         <geoip2.version>2.14.0</geoip2.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <repository-module.version>1.0-SNAPSHOT</repository-module.version>
         <service-module.version>1.0-SNAPSHOT</service-module.version>
         <web-module.version>0.0.1-SNAPSHOT</web-module.version>
         <bootstrap.version>4.4.1-1</bootstrap.version>
     </properties>
     <modules>
+        <module>repository-module</module>
         <module>service-module</module>
         <module>web-module</module>
     </modules>

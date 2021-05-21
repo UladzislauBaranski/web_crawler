@@ -1,3 +1,4 @@
+/*
 package com.gmail.vladbaransky.webmodule.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -127,4 +128,4 @@ class SearchDataControllerTest {
         termAndNumberOfRepetitionsList.add(termAndNumberOfRepetitionsMap);
         return termAndNumberOfRepetitionsList;
     }
-}
+}*/

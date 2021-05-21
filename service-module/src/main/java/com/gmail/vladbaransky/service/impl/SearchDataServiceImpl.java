@@ -1,5 +1,7 @@
+/*
 package com.gmail.vladbaransky.service.impl;
 
+import com.gmail.vladbaransky.repositorymodule.SearchDataRepository;
 import com.gmail.vladbaransky.service.SearchDataService;
 import com.gmail.vladbaransky.service.model.SearchData;
 import com.gmail.vladbaransky.service.util.FileReaderUrl;
@@ -20,31 +22,13 @@ import static com.gmail.vladbaransky.service.constant.RegexpConstant.STRING_BY_W
 @Service
 public class SearchDataServiceImpl implements SearchDataService {
     private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
-    private final FileReaderUrl fileReaderUrl;
-
-    public SearchDataServiceImpl(FileReaderUrl fileReaderUrl) {
-        this.fileReaderUrl = fileReaderUrl;
-    }
 
     @Override
     public SearchData getWebCrawler(SearchData searchData) {
-        List<String> urlList = fileReaderUrl.getUrlListFromFile();
-        Map<String, Long> termAndNumberOfRepetitions;
-        List<Map<String, Long>> mapList = new ArrayList<>();
 
-        List<Map<String, Long>> termAndNumberOfRepetitionsList = new ArrayList<>();
-        Map<String, Long> termAndNumberOfRepetitionsMap = new HashMap<>();
-        termAndNumberOfRepetitionsList.add(termAndNumberOfRepetitionsMap);
+        searchData
+                  findTermsInWebsite();
 
-        searchData.setUrlList(urlList);
-        searchData.setTermAndNumberOfRepetitions(termAndNumberOfRepetitionsList);
-        for (String url : searchData.getUrlList()) {
-            for (String term : searchData.getTerms()) {
-                termAndNumberOfRepetitions = findTermsInWebsite(term, url);
-                mapList.add(termAndNumberOfRepetitions);
-            }
-        }
-        searchData.setTermAndNumberOfRepetitions(mapList);
         writeToConsole(searchData);
         writeToFile(searchData);
         return searchData;
@@ -139,3 +123,4 @@ public class SearchDataServiceImpl implements SearchDataService {
         }
     }
 }
+*/
