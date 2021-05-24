@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <title>web crawler</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <link href="./css/main.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="container">
+    <h2 class="text-center">web crawler</h2>
+    <form id="formElem">
+        <div id="textarea">
+                          <textarea
+                                  class="textarea"
+                                  id="url"
+                                  name="urls"
+                                  placeholder="List URL:">
+https://www.onliner.by/
+https://students.njay.ru/
+https://www.youtube.com/</textarea>
+            <textarea
+                    class="textarea"
+                    id="term"
+                    name="terms"
+                    placeholder="Terms:"
+            ></textarea>
+        </div>
+        <div>
+            <input class="input" id="visit" type="text" placeholder="Enter max visited pages">
+            <input class="input" id="depth" type="text" placeholder="Enter max link depth">
+        </div>
+        <input id="submit" type="submit" class="search-form__button_submit btn btn-primary"
+               value="Поиск"/>
+    </form>
+    <a href="/api/export">Экспорт в CSV</a>
+</div>
+<table>
+    <thead>
+    <tr>
+        <th>URL</th>
+        <th>Term</th>
+        <th>Count</th>
+    </tr>
+    </thead>
+    <tbody id="tbody">
+
+    </tbody>
+</table>
+<script src="/js/own-table.js"></script>
+</body>
+</html>

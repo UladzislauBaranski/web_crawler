@@ -1,10 +1,14 @@
 package com.gmail.vladbaransky.repositorymodule.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
-public class Term {
+@Entity
+@Table(name = "terms")
+public class Term implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -14,9 +18,7 @@ public class Term {
     @Column(name = "count")
     private Long count;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "urls", joinColumns = @JoinColumn(name = "term_id"),
-            inverseJoinColumns = @JoinColumn(name = "url_id"))
+    @ManyToMany(mappedBy = "termList")
     private List<Url> urlList = new LinkedList<>();
 
     public Long getId() {
@@ -49,5 +51,21 @@ public class Term {
 
     public void setUrlList(List<Url> urlList) {
         this.urlList = urlList;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Term term1 = (Term) o;
+        return Objects.equals(id, term1.id) &&
+                Objects.equals(term, term1.term) &&
+                Objects.equals(count, term1.count) &&
+                Objects.equals(urlList, term1.urlList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, term, count, urlList);
     }
 }

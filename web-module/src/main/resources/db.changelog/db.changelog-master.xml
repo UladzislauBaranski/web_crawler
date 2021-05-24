@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1" author="vladbaransky@gmail.com">
+        <createTable tableName="urls">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="url" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="vladbaransky@gmail.com">
+        <createTable tableName="terms">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="term" type="varchar(50)"/>
+            <column name="count" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="vladbaransky@gmail.com">
+        <createTable tableName="urls_terms">
+
+            <column name="url_id" type="BIGINT">
+                <constraints primaryKey="true"
+                             foreignKeyName="fk_urls"
+                             referencedTableName="urls"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="term_id" type="BIGINT">
+                <constraints primaryKey="true"
+                             foreignKeyName="fk_terms"
+                             referencedTableName="terms"
+                             referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

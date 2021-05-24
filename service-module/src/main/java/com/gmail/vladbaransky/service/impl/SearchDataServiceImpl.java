@@ -1,126 +1,125 @@
-/*
 package com.gmail.vladbaransky.service.impl;
 
 import com.gmail.vladbaransky.repositorymodule.SearchDataRepository;
+import com.gmail.vladbaransky.repositorymodule.model.Url;
 import com.gmail.vladbaransky.service.SearchDataService;
-import com.gmail.vladbaransky.service.model.SearchData;
-import com.gmail.vladbaransky.service.util.FileReaderUrl;
+import com.gmail.vladbaransky.service.converter.UrlConverter;
+import com.gmail.vladbaransky.service.model.TermDTO;
+import com.gmail.vladbaransky.service.model.UrlDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.dom4j.Text;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-
-import static com.gmail.vladbaransky.service.constant.Constant.*;
-import static com.gmail.vladbaransky.service.constant.FilePathConstant.OUTPUT_FILE_PATH;
-import static com.gmail.vladbaransky.service.constant.RegexpConstant.STRING_BY_WORD_REGEXP;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class SearchDataServiceImpl implements SearchDataService {
+    private static final String REGEX = "[' ']";
+    private static final String MAX_VISIT_MESSAGE = "Max visited pages more than";
+    private static final String LINK_DEPTH_MESSAGE = "Link depth more than";
     private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+    private final SearchDataRepository searchDataRepository;
+    private long countTransition = 0;
+
+    public SearchDataServiceImpl(SearchDataRepository searchDataRepository) {
+        this.searchDataRepository = searchDataRepository;
+    }
 
     @Override
-    public SearchData getWebCrawler(SearchData searchData) {
-
-        searchData
-                  findTermsInWebsite();
-
-        writeToConsole(searchData);
-        writeToFile(searchData);
-        return searchData;
-    }
-
-    private Map<String, Long> findTermsInWebsite(String term, String urlString) {
-        Long count = 0L;
-        Map<String, Long> map = new TreeMap<>();
-        try {
-            URL url = new URL(urlString);
-            try {
-                LineNumberReader reader = new LineNumberReader(new InputStreamReader(url.openStream()));
-                String string = reader.readLine();
-                while (string != null) {
-                    boolean result = string.contains(term);
-                    if (result) {
-                        map = findTermsByString(string, term);
-                        Set<String> terms = map.keySet();
-                        for (String termKey : terms) {
-                            count += map.get(termKey);
-                            map.put(termKey, count);
-                        }
+    public List<UrlDTO> searchDataOnWeb(List<String> urls, List<String> terms, Integer visit, Integer depth) {
+        List<UrlDTO> newUrlList = new ArrayList<>();
+        for (String url : urls) {
+            if (checkLinkDepth(url, depth)) {
+                if (checkCountTransition() <= visit) {
+                    List<TermDTO> ts = new ArrayList<>();
+                    for (String term : terms) {
+                        TermDTO termDTO = new TermDTO(term);
+                        ts.add(termDTO);
                     }
-                    string = reader.readLine();
+                    UrlDTO urlDTO = new UrlDTO(url, ts);
+                    UrlDTO result = findTermsInWebsite(urlDTO);
+                    newUrlList.add(result);
+                } else logger.info(MAX_VISIT_MESSAGE + visit);
+            } else logger.info(LINK_DEPTH_MESSAGE + depth);
+        }
+        return newUrlList;
+    }
+
+    private UrlDTO findTermsInWebsite(UrlDTO urlDTO) {
+        String urlName = urlDTO.getUrl();
+        List<TermDTO> termDTOList = urlDTO.getTermDTOList();
+        for (int i = 0; i < termDTOList.size(); i++) {
+            try {
+                URL url = new URL(urlName);
+                try {
+                    LineNumberReader reader = new LineNumberReader(new InputStreamReader(url.openStream()));
+                    Long count = 0L;
+                    String term = termDTOList.get(i).getTerm();
+                    String regex = "" + term + "";
+                    Pattern regexp = Pattern.compile(regex);
+                    String string = reader.readLine();
+                    while (string != null) {
+                        Matcher m = regexp.matcher(string);
+                        if (m.find()) {
+                            String[] split = string.split(REGEX);
+                            for (String s : split) {
+
+                                Matcher match = regexp.matcher(s);
+                                while (match.find()) {
+                                    count++;
+                                }
+                            }
+                        }
+                        string = reader.readLine();
+                    }
+                    reader.close();
+                    urlDTO.getTermDTOList().get(i).setCount(count);
+                } catch (IOException e) {
+                    e.getMessage();
                 }
-                reader.close();
-            } catch (IOException e) {
-                e.getMessage();
-            }
-        } catch (MalformedURLException ex) {
-            ex.getMessage();
-        }
-        Map<String, Long> emptyMap = new TreeMap<>();
-        emptyMap.put(term, 0L);
-        if (!map.isEmpty()) {
-            return map;
-        } else {
-            return emptyMap;
-        }
-    }
 
-    private Map<String, Long> findTermsByString(String string, String term) {
-        Map<String, Long> mapTermAndNumberOfRepetitions = new HashMap<>();
-        mapTermAndNumberOfRepetitions.put(term, 0L);
-        Map<String, Long> map = new HashMap<>();
-        List<String> StringByWords = new ArrayList<>();
-        StringByWords.addAll(Arrays.asList(string.split(STRING_BY_WORD_REGEXP)));
-        for (String word : StringByWords) {
-            if (word.equals(term)) {
-                mapTermAndNumberOfRepetitions = countDuplicates(word, map);
+            } catch (MalformedURLException ex) {
+                ex.getMessage();
             }
         }
-        return mapTermAndNumberOfRepetitions;
+        return urlDTO;
     }
 
-    private Map<String, Long> countDuplicates(String word, Map<String, Long> map) {
-        map.merge(word, 1L, Long::sum);
-        return map;
+    @Override
+    public void addEntitiesToDb(List<UrlDTO> urlDTOList) {
+        List<Url> urlList = urlDTOList.stream().map(UrlConverter::getObjectFromDTO).collect(Collectors.toList());
+        searchDataRepository.addObject(urlList);
     }
 
-    private void writeToFile(SearchData searchData) {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(OUTPUT_FILE_PATH))) {
-            bufferedWriter.write(HEAD);
-            bufferedWriter.write(System.lineSeparator());
-            int j = 0;
-            for (int i = 0; i < searchData.getUrlList().size(); i++) {
-                for (j = j; j < searchData.getTerms().size() * (i + 1); j++) {
-                    bufferedWriter.write(String.valueOf(searchData.getTermAndNumberOfRepetitions().get(j).values()));
-                }
-                bufferedWriter.write(SEPARATOR);
-                bufferedWriter.write(String.valueOf(searchData.getTerms()));
-                bufferedWriter.write(SEPARATOR);
-                bufferedWriter.write(String.valueOf(searchData.getUrlList().get(i)));
-                bufferedWriter.write(System.lineSeparator());
-            }
-        } catch (IOException e) {
-            e.getMessage();
-        }
+    @Override
+    public List<UrlDTO> getEntitiesFroDb() {
+        List<Url> urlList = searchDataRepository.getAllObject();
+        return urlList.stream().map(UrlConverter::getDTOFromObject).collect(Collectors.toList());
     }
 
-    private void writeToConsole(SearchData searchData) {
-        List<Collection<Long>> mapValuesList = new ArrayList<>();
-        logger.info(SEPARATOR_LINE);
-        logger.info(HEAD);
-        int j = 0;
-        for (int i = 0; i < searchData.getUrlList().size(); i++) {
-            for (j = j; j < searchData.getTerms().size() * (i + 1); j++) {
-                mapValuesList.add(searchData.getTermAndNumberOfRepetitions().get(j).values());
-            }
-            logger.info(mapValuesList + SEPARATOR_SPACE + searchData.getTerms() + SEPARATOR_SPACE + searchData.getUrlList().get(i));
-            mapValuesList.clear();
-        }
+    private boolean checkLinkDepth(String url, Integer depth) {
+        String[] split = url.split("/");
+        return split.length <= depth;
     }
+
+    private long checkCountTransition() {
+        countTransition++;
+        return countTransition;
+    }
+
+
 }
-*/

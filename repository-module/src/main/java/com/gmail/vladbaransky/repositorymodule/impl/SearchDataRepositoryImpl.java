@@ -1,11 +1,11 @@
 package com.gmail.vladbaransky.repositorymodule.impl;
 
 import com.gmail.vladbaransky.repositorymodule.SearchDataRepository;
-import com.gmail.vladbaransky.repositorymodule.model.Article;
+import com.gmail.vladbaransky.repositorymodule.model.Url;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class SearchDataRepositoryImpl extends GenericDaoRepositoryImpl<Long, Article> implements SearchDataRepository {
+public class SearchDataRepositoryImpl extends GenericDaoRepositoryImpl<Long, Url> implements SearchDataRepository {
 
 /*    @Override
     public List<Article> getObjectByPage(int startPosition, int objectByPage) {

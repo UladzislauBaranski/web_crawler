@@ -4,8 +4,10 @@ import java.util.List;
 
 public interface GenericDaoRepository<I, T> {
 
-   /* List<T> getAllObject();
+    void addObject(List<T> entity);
+    List<T> getAllObject();
 
+    /*
     T addObject(T entity);
 
     T delete(T entity);

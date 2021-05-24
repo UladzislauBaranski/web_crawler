@@ -21,6 +21,18 @@ public class GenericDaoRepositoryImpl<I, T> implements GenericDaoRepository<I, T
                 .getGenericSuperclass();
         this.entityClass = (Class<T>) genericSuperclass.getActualTypeArguments()[1];
     }
+
+    @Override
+    public void addObject(List<T> entityList) {
+        for (T entity : entityList) entityManager.persist(entity);
+    }
+
+    @Override
+    public List<T> getAllObject() {
+        String query = "from " + entityClass.getName();
+        Query q = entityManager.createQuery(query);
+        return q.getResultList();
+    }
 /*
     @Override
     public List<T> getAllObject() {
@@ -46,11 +58,7 @@ public class GenericDaoRepositoryImpl<I, T> implements GenericDaoRepository<I, T
         return (T) query.getSingleResult();
     }
 
-    @Override
-    public T addObject(T entity) {
-        entityManager.persist(entity);
-        return entity;
-    }
+
 
     @Override
     public T updateObject(T entity) {
